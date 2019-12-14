@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" RowElementContainer="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" RowElementContainer="ie=edge">
+    <title>Document</title>
+    <style>
+        #order {
+            display: block;
+            padding: 5px;
+            margin: 10px auto;
+            border: 1px solid grey;
+            border-radius: 5px;
+        }
+        #order:focus {
+            outline: none;
+        }
+        .matrix {
+            display: block;
+            text-align: center;
+            overflow: auto;
+            padding: 2px;
+            margin: 10px 0;
+        }
+        .Row {
+            display: block;
+            white-space: nowrap;
+        }
+
+        .RowElementContainer {
+            position: relative;
+            width: 50px;
+            height: 50px;
+            display: inline-block;
+            margin: 2px 2px;
+        }
+
+        .RowElementContainer label,
+        .RowElementContainer label input {
+            width: inherit;
+            height: inherit;
+            border: none;
+            text-align: center;
+            font-size: 20px;
+            outline: none;
+            padding: 0;
+            margin: 0;
+            background-color: red;
+        }
+        .RowElementContainer:before,
+        .RowElementContainer:after,
+        .RowElementContainer>:first-child:before,
+        .RowElementContainer>:first-child:after {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: #303030;
+            content:'';
+        }
+
+        .RowElementContainer:before {
+            top: -4px;
+            left: -4px;
+        }
+
+        .RowElementContainer:after {
+            top: -4px;
+            right: -4px;
+        }
+
+        .RowElementContainer>:first-child:before {
+            bottom: -4px;
+            right: -4px;
+        }
+
+        .RowElementContainer>:first-child:after {
+            bottom: -4px;
+            left: -4px;
+        }
+
+        #show {
+            display: block;
+            margin: 15px auto;
+            padding: 5px;
+            font-size: 1rem;
+            font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+            background-color: blue;
+            color: white;
+        }
+        #show:focus {
+            outline: none;
+        }
+
+        #result {
+            position: relative;
+            display: block;
+            width: 200px;
+            min-height: 3rem;
+            line-height: 3rem;
+            border: 1px solid black;
+            border-radius: 10px;
+            text-align: center;
+            margin: auto;
+        }
+        #result::after {
+            content: 'Result';
+            position: absolute;
+            background: #ffffff;
+            line-height: 20px;
+            top: -10px;
+            left: 5px;
+            padding: 0 2px;
+        }
+    </style>
+</head>
+
+<body>
+    <label for="order"><input type="number" id="order" value="3" name="order" min="2" placeholder="order of matrix"></label>
+    <div class="matrix"></div>
+    <button id="show">CALCULATE</button>
+    <output id="result"></output>
+
+    <script>
+        // create matrix
+        let createMatrix = () => {
+            let matrix = document.querySelector('.matrix');
+            matrix.innerHTML = '';
+            let orderValue = order.value;
+            for (let i = 0; i < orderValue; i++) {
+                matrix.insertAdjacentHTML('afterbegin', '<div class="Row"></div>');
+                let Row = document.querySelector('.Row');
+                for (let ii = 0; ii < orderValue; ii++) {
+                    Row.insertAdjacentHTML('afterbegin', '<div class="RowElementContainer"><label><input type="number"></label></div>');
+                }
+            }
+            travellingKeys(orderValue);
+            return null;
+        };
+
+        // functioning of arrow keys
+        let travellingKeys = (orderValue) => {
+            let matrixElementInputBox = document.querySelectorAll('.RowElementContainer label input');
+            for (let currentBox = 0, boxNumber = matrixElementInputBox.length; currentBox < boxNumber; currentBox++) {
+                matrixElementInputBox[currentBox].addEventListener('keypress', (event) => {
+                    // event.preventDefault();
+                    let x = event.which || event.keyCode;
+                    console.log(x);
+                    if (x === 37) {  //left arrow
+                        let adjacentRowElementContainer = event.target.parentElement.parentElement.previousSibling;
+                        if (adjacentRowElementContainer === null) {
+                            let adjacentRow = event.target.parentElement.parentElement.parentElement.previousSibling;
+                            if (adjacentRow === null) {
+                                let firstRow = event.target.parentElement.parentElement.parentElement.parentElement.lastChild;
+                                firstRow.lastChild.lastChild.lastChild.focus();
+                            } else {
+                                adjacentRow.lastChild.lastChild.lastChild.focus();
+                            }
+                        } else {
+                            adjacentRowElementContainer.lastChild.lastChild.focus();
+                        }
+                    } else if (x === 38) {  //up arrow
+                        let currentRow = event.target.parentElement.parentElement.parentElement;
+                        let adjacentRow = currentRow.previousSibling;
+                        let count = 0;
+                        for (; count < orderValue; count++) {
+                            if (event.target === currentRow.children[count].firstChild.firstChild) {
+                                break;
+                            }
+                        }
+                        if (adjacentRow === null) {
+                            currentRow.parentElement.lastChild.children[count].firstChild.firstChild.focus();
+                        } else {
+                            adjacentRow.children[count].firstChild.firstChild.focus();
+                        }
+                    } else if (x === 39) {  //right arrow
+                        let adjacentRowElementContainer = event.target.parentElement.parentElement.nextSibling;
+                        if (adjacentRowElementContainer === null) {
+                            let adjacentRow = event.target.parentElement.parentElement.parentElement.nextSibling;
+                            if (adjacentRow === null) {
+                                let firstRow = event.target.parentElement.parentElement.parentElement.parentElement.firstChild;
+                                firstRow.firstChild.firstChild.firstChild.focus();
+                            } else {
+                                adjacentRow.firstChild.firstChild.firstChild.focus();
+                            }
+                        } else {
+                            adjacentRowElementContainer.firstChild.firstChild.focus();
+                        }
+                    } else if (x === 40) {  //down arrow
+                        let currentRow = event.target.parentElement.parentElement.parentElement;
+                        let adjacentRow = currentRow.nextSibling;
+                        let count = 0;
+                        for (; count < orderValue; count++) {
+                            if (event.target === currentRow.children[count].firstChild.firstChild) {
+                                break;
+                            }
+                        }
+                        if (adjacentRow === null) {
+                            currentRow.parentElement.firstChild.children[count].firstChild.firstChild.focus();
+                        } else {
+                            adjacentRow.children[count].firstChild.firstChild.focus();
+                        }
+                    }
+                });
+            }
+        };
+
+        // show the determinant on the screen
+        document.getElementById('show').addEventListener('click', () => {
+            let matrixElement = [];
+            let Row = document.querySelectorAll('.Row');
+            for (let i = 0; i < Row.length; i++) {
+                let row = Row[i].querySelectorAll('label input');
+                let rowElement = [];
+                for (let ii = 0; ii < row.length; ii++) {
+                    rowElement.push(row[ii].value);
+                }
+                matrixElement.push(rowElement);
+            }
+            document.getElementById('result').innerText = det(matrixElement) || 'Error occured';
+            return null;
+        });
+
+        // calculate determinant
+        let det = (matrixArr) => {
+            let order = matrixArr.length;
+            if (order > 2) {
+                let row = 0;
+                let value = 0;
+                for (let col = 0; col < order; col++) {
+                    value += matrixArr[row][col] * Math.pow(-1, col + row) * det(cofactor(matrixArr, row, col));
+                }
+                return value;
+            } else if (order == 2) {
+                let val = matrixArr[0][0] * matrixArr[1][1] - matrixArr[0][1] * matrixArr[1][0];
+                return val;
+            } else if (order < 2) {
+                return 0;
+            }
+        };
+
+        // to create a matrix leaving 1 row and 1 col which is been passed
+        let cofactor = (smallMatrixArr, row, col) => {
+            let order = smallMatrixArr.length;
+            let newMatrix = [];
+            for (let sRow = 0; sRow < order; sRow++) {
+                if (row === sRow) {
+                    continue;
+                } else {
+                    let tempRow = [];
+                    for (let sCol = 0; sCol < order; sCol++) {
+                        if (col === sCol) {
+                            continue;
+                        } else {
+                            tempRow.push(smallMatrixArr[sRow][sCol]);
+                        }
+                    }
+                    newMatrix.push(tempRow);
+                }
+            }
+            return newMatrix;
+        };
+
+        let order = document.querySelector('#order');
+        order.addEventListener('input', createMatrix);
+        document.onload = createMatrix();
+    </script>
+</body>
+
+</html>
